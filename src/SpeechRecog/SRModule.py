@@ -14,7 +14,7 @@ class ServerRequestError(Exception):
 class SRModule:
     def __init__(self):
         self.recognizer = sr.Recognizer()
-        self.recognizer.pause_threshold = 0.5
+        self.recognizer.pause_threshold = 1
         self.microphone = sr.Microphone()
         self.audio = None
         self.recognized_text = None
@@ -51,8 +51,8 @@ class SRModule:
         return recognized_text
 
     def _recognize_houndify(self, id, key):
-        HOUNDIFY_CLIENT_ID = id  # "dVdGP0yoHHRo7tWi2dJ-CQ=="  # Houndify client IDs are Base64-encoded strings
-        HOUNDIFY_CLIENT_KEY = key  # "p2XmAMsymEhyqvJq0W4Irv21RGB6O1xppyV4PL7-WeR-gPIUZBETvxkgJtIx1SA0SuAHK7x2YmI0AWF-5UUiHA=="  # Houndify client keys are Base64-encoded strings
+        HOUNDIFY_CLIENT_ID = id
+        HOUNDIFY_CLIENT_KEY = key
         try:
             recognized_text = self.recognizer.recognize_houndify(self.audio, client_id=HOUNDIFY_CLIENT_ID,
                                                                  client_key=HOUNDIFY_CLIENT_KEY)
@@ -66,10 +66,3 @@ class SRModule:
         if self.audio is None:
             raise ValueError("No audio given yet")
         self.recognized_text = self.strategies[engine](id, key)
-
-
-if __name__ == '__main__':
-    srec = SRModule()
-    srec.obtain_audio()
-    srec.recognize('houndify', 'dVdGP0yoHHRo7tWi2dJ-MQ==',
-                   'p2XmAMsymEhyqvJq0W4Irv21RGB6O1xppyV4PL7-WeR-gPIUZBETvxkgJtIx1SA0SuAHK7x2YmI0AWF-5UUiHA==')

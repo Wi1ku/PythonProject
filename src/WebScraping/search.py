@@ -15,7 +15,6 @@ class NoResultError(Exception):
 
 def search(query):
     query = query.replace(' ', '+')
-    # inaczej to zrobić maybe (paremetry url)
     url = f"https://www.google.com/search?hl=en&gl=en&q={query}"
     try:
         request_result = requests.get(url)

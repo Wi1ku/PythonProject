@@ -25,13 +25,9 @@ class App:
         self.SRengine = tk.StringVar()
         self.SRengine.set(list(self.sr.strategies.keys())[1])
         self.root.set_theme("black")
-        self.root.geometry("260x120")
-        self.main_frame = Frame(self.root)
-        self.menubar = tk.Menu(self.root)
-        Manage = tk.Menu(self.menubar, tearoff=0)
-        Manage.add_command(label="settings", command=self.settings)
-        self.menubar.add_cascade(label="Options", menu=Manage)
-        self.root.config(menu=self.menubar)
+        self.root.geometry("380x210")
+        self.nb = Notebook(self.root)
+        self.main_frame = Frame(self.nb)
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.main_frame.grid(row=0, column=0, sticky=tk.E + tk.W + tk.N + tk.S)
@@ -42,10 +38,10 @@ class App:
         self.ent_query = Entry(self.main_frame, width=40)
         self.ent_query.grid(column=1, row=2, padx=7, pady=7, columnspan=3, sticky=tk.E + tk.W)
         self.btn_record = Button(self.main_frame, text="Record", command=self.record)
-        self.btn_record.grid(column=1, row=3, padx=7, pady=7)
+        self.btn_record.grid(column=1, row=3, padx=14, pady=14)
         self.btn_search = Button(self.main_frame, text="Search",
                                  command=lambda: self.do_search(self.search_module.get()))
-        self.btn_search.grid(column=2, row=3, padx=7, pady=7)
+        self.btn_search.grid(column=2, row=3, padx=14, pady=14)
         self.tts = TTS.TTSModule()
         self.SRid = ""
         self.SRkey = ""
@@ -55,6 +51,11 @@ class App:
             "google": self.do_search_google,
             "wikipedia": self.do_search_wikipedia
         }
+
+        self.nb.add(self.main_frame, text='search')
+        self.configure_settings()
+
+        self.nb.pack(expand=1, fill="both")
 
     def record(self):
         try:
@@ -95,14 +96,18 @@ class App:
                 set_label_text(self.lbl_feedback, "Ready")
             else:
                 view = tk.Toplevel()
+                view.geometry("410x240")
                 view.columnconfigure(0, weight=1)
                 view.rowconfigure(0, weight=1)
                 lbl_frame = Labelframe(view)
                 row = 0
                 column = 0
-                lbl_frame.grid(row=row, column=column, padx=10, pady=10)
                 lbl_frame.columnconfigure(0, weight=1)
                 lbl_frame.rowconfigure(0, weight=1)
+                lbl_frame.grid(row=row, column=column, sticky=tk.E + tk.W + tk.N + tk.S)
+                lbl_results = Label(lbl_frame, text="Results: ", width=200, font=("Courier", 16))
+                lbl_results.grid(row=row, column=column, padx=10, pady=10)
+                row = row + 1
                 for resultpage, summary in resultlist:
                     lbl_title = Label(lbl_frame, text=resultpage)
                     say = partial(self.tts.say, summary)
@@ -130,17 +135,12 @@ class App:
         except NoRequestResultError:
             set_label_text(self.lbl_feedback, "Error while looking for answer")
 
-    def apply_settings(self, view, ent_id, ent_key):
+    def apply_settings(self, ent_id, ent_key):
         self.SRid = retrieve_input(ent_id)
         self.SRkey = retrieve_input(ent_key)
-        view.destroy()
 
-    def settings(self):
-        view = tk.Toplevel()
-        view.columnconfigure(0, weight=1)
-        view.rowconfigure(0, weight=1)
-        frame = Frame(view)
-        view.geometry("360x220")
+    def configure_settings(self):
+        frame = Frame(self.nb)
         frame.grid(row=0, column=0, sticky=tk.E + tk.W + tk.N + tk.S)
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(0, weight=1)
@@ -167,8 +167,9 @@ class App:
         ent_hound_key = Entry(frame)
         ent_hound_key.insert(0, self.SRkey)
         ent_hound_key.grid(row=3, column=1, padx=2, pady=2)
-        btn_ok = Button(frame, text='OK', command=lambda: self.apply_settings(view, ent_hound_id, ent_hound_key))
+        btn_ok = Button(frame, text='Apply', command=lambda: self.apply_settings(ent_hound_id, ent_hound_key))
         btn_ok.grid(row=4, column=2, padx=10, pady=10)
+        self.nb.add(frame, text='settings')
 
     def run(self):
         self.root.mainloop()
